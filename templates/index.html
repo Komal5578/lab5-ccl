@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Student CRUD - DynamoDB</title>
+  <style>
+    body { font-family: Arial; max-width: 700px; margin: 40px auto; }
+    input { display:block; margin:6px 0; padding:6px; width:100%; box-sizing:border-box; }
+    button { margin:4px 4px 12px 0; padding:8px 14px; }
+    #output { background:#f4f4f4; padding:10px; white-space:pre-wrap; }
+    fieldset { margin-bottom: 20px; }
+  </style>
+</head>
+<body>
+  <h2>Student Management (DynamoDB CRUD)</h2>
+
+  <fieldset>
+    <legend>Create / Update</legend>
+    <input id="student_id" placeholder="Student ID (e.g. S101)">
+    <input id="name" placeholder="Name">
+    <input id="age" placeholder="Age" type="number">
+    <label><input id="is_active" type="checkbox" checked style="width:auto;display:inline"> Active</label>
+    <input id="subjects" placeholder="Subjects (comma separated, e.g. Math,CS)">
+    <input id="city" placeholder="City">
+    <input id="pincode" placeholder="Pincode">
+    <button onclick="createStudent()">Create</button>
+    <button onclick="updateStudent()">Update</button>
+  </fieldset>
+
+  <fieldset>
+    <legend>Read / Delete</legend>
+    <button onclick="getAll()">Get All Students</button>
+    <button onclick="getOne()">Get One (uses Student ID above)</button>
+    <button onclick="deleteStudent()">Delete (uses Student ID above)</button>
+  </fieldset>
+
+  <h3>Output</h3>
+  <div id="output">Results will show here...</div>
+
+<script>
+function getForm() {
+  return {
+    student_id: document.getElementById('student_id').value,
+    name: document.getElementById('name').value,
+    age: Number(document.getElementById('age').value),
+    is_active: document.getElementById('is_active').checked,
+    subjects: document.getElementById('subjects').value.split(',').map(s => s.trim()).filter(Boolean),
+    address: {
+      city: document.getElementById('city').value,
+      pincode: document.getElementById('pincode').value
+    }
+  };
+}
+function show(data) { document.getElementById('output').textContent = JSON.stringify(data, null, 2); }
+
+async function createStudent() {
+  const res = await fetch('/students', { method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify(getForm()) });
+  show(await res.json());
+}
+async function updateStudent() {
+  const id = document.getElementById('student_id').value;
+  const res = await fetch('/students/' + id, { method: 'PUT', headers: {'Content-Type':'application/json'}, body: JSON.stringify(getForm()) });
+  show(await res.json());
+}
+async function getAll() {
+  const res = await fetch('/students');
+  show(await res.json());
+}
+async function getOne() {
+  const id = document.getElementById('student_id').value;
+  const res = await fetch('/students/' + id);
+  show(await res.json());
+}
+async function deleteStudent() {
+  const id = document.getElementById('student_id').value;
+  const res = await fetch('/students/' + id, { method: 'DELETE' });
+  show(await res.json());
+}
+</script>
+</body>
+</html>
